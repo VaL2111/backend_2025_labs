@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: lab1-nest-app-compose
+    ports:
+      - "8080:3000"
+    restart: unless-stopped
