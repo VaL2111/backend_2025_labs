@@ -10,8 +10,8 @@
 
 1.  **Клонуйте репозиторій:**
     ```bash
-    git clone https://github.com/VaL2111/lab1_project_configuration
-    cd lab1_project_configuration
+    git clone https://github.com/VaL2111/backend_2025_labs
+    cd backend_2025_labs
     ```
 
 2.  **Встановіть залежності:**
