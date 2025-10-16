@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateCategoryDto } from "./dto/create-category.dto";
-import { UpdateCategoryDto } from "./dto/update-category.dto";
 import { v4 as uuidv4 } from "uuid";
 
 export interface Category {
@@ -19,6 +18,14 @@ export class CategoriesService {
     };
     this.categories.push(newCategory);
     return newCategory;
+  }
+
+  findOne(id: string): Category {
+    const category = this.categories.find((category) => category.id === id);
+    if (!category) {
+      throw new NotFoundException(`Category with ID #${id} not found.`);
+    }
+    return category;
   }
 
   findAll(): Category[] {
