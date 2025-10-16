@@ -10,7 +10,7 @@ import {
 import { RecordsService } from "./records.service";
 import { CreateRecordDto } from "./dto/create-record.dto";
 
-@Controller("records")
+@Controller("record")
 export class RecordsController {
   constructor(private readonly recordsService: RecordsService) {}
 
