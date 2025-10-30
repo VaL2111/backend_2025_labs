@@ -1,45 +1,38 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
-import { v4 as uuidv4 } from "uuid";
-
-export interface User {
-  id: string;
-  name: string;
-}
+import { InjectRepository } from "@nestjs/typeorm";
+import { User } from "./entities/user.entity";
+import { Repository } from "typeorm";
 
 @Injectable()
 export class UsersService {
-  private readonly users: User[] = [];
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
 
-  create(createUserDto: CreateUserDto): User {
-    const newUser: User = {
-      id: uuidv4(),
-      name: createUserDto.name,
-    };
-
-    this.users.push(newUser);
-    return newUser;
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const newUser = this.userRepository.create(createUserDto);
+    return this.userRepository.save(newUser);
   }
 
-  findAll(): User[] {
-    return this.users;
+  async findAll(): Promise<User[]> {
+    return this.userRepository.find();
   }
 
-  findOne(id: string): User {
-    const user = this.users.find((user) => user.id === id);
+  async findOne(id: string): Promise<User> {
+    const user = await this.userRepository.findOneBy({ id: id });
     if (!user) {
       throw new NotFoundException(`User with ID #${id} not found.`);
     }
     return user;
   }
 
-  remove(id: string): { message: string } {
-    const userIndex = this.users.findIndex((user) => user.id === id);
-    if (userIndex === -1) {
+  async remove(id: string): Promise<{ message: string }> {
+    const result = await this.userRepository.delete(id);
+    if (result.affected === 0) {
       throw new NotFoundException(`User with ID #${id} not found.`);
     }
-    this.users.splice(userIndex, 1);
     return { message: `User with ID #${id} successfully deleted.` };
   }
 }
