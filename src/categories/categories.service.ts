@@ -1,45 +1,40 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateCategoryDto } from "./dto/create-category.dto";
-import { v4 as uuidv4 } from "uuid";
-
-export interface Category {
-  id: string;
-  name: string;
-}
+import { InjectRepository } from "@nestjs/typeorm";
+import { Category } from "./entities/category.entity";
+import { Repository } from "typeorm";
 
 @Injectable()
 export class CategoriesService {
-  private readonly categories: Category[] = [];
+  constructor(
+    @InjectRepository(Category)
+    private readonly categoryRepository: Repository<Category>,
+  ) {}
 
-  create(createCategoryDto: CreateCategoryDto): Category {
-    const newCategory: Category = {
-      id: uuidv4(),
-      name: createCategoryDto.name,
-    };
-    this.categories.push(newCategory);
-    return newCategory;
+  async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
+    const newCategory = this.categoryRepository.create(createCategoryDto);
+    return this.categoryRepository.save(newCategory);
   }
 
-  findOne(id: string): Category {
-    const category = this.categories.find((category) => category.id === id);
+  async findOne(id: string): Promise<Category> {
+    const category = await this.categoryRepository.findOneBy({ id: id });
     if (!category) {
       throw new NotFoundException(`Category with ID #${id} not found.`);
     }
     return category;
   }
 
-  findAll(): Category[] {
-    return this.categories;
+  async findAll(): Promise<Category[]> {
+    return this.categoryRepository.find();
   }
 
-  remove(id: string): { message: string } {
-    const categoryIndex = this.categories.findIndex(
-      (category) => category.id === id,
-    );
-    if (categoryIndex === -1) {
+  async remove(id: string): Promise<{ message: string }> {
+    const result = await this.categoryRepository.delete(id);
+
+    if (result.affected === 0) {
       throw new NotFoundException(`Category with ID #${id} not found.`);
     }
-    this.categories.splice(categoryIndex, 1);
-    return { message: `Category with ID #${id} successfully deleted.` };
+
+    return { message: `Category with ID #${id} successfully deleted` };
   }
 }
