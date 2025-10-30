@@ -6,79 +6,68 @@ import {
 import { CreateRecordDto } from "./dto/create-record.dto";
 import { UsersService } from "src/users/users.service";
 import { CategoriesService } from "src/categories/categories.service";
-import { v4 as uuidv4 } from "uuid";
-
-export interface Record {
-  id: string;
-  userId: string;
-  categoryId: string;
-  createAt: Date;
-  amount: number;
-}
+import { FindOptionsWhere, Repository } from "typeorm";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Record } from "./entities/record.entity";
 
 @Injectable()
 export class RecordsService {
-  private readonly records: Record[] = [];
-
   constructor(
+    @InjectRepository(Record)
+    private readonly recordRepository: Repository<Record>,
+
     private readonly usersService: UsersService,
     private readonly categoriesService: CategoriesService,
   ) {}
 
-  create(createRecordDto: CreateRecordDto): Record {
-    this.usersService.findOne(createRecordDto.userId);
-    this.categoriesService.findOne(createRecordDto.categoryId);
+  async create(createRecordDto: CreateRecordDto): Promise<Record> {
+    await this.usersService.findOne(createRecordDto.userId);
+    await this.categoriesService.findOne(createRecordDto.categoryId);
 
-    const newRecord: Record = {
-      id: uuidv4(),
-      createAt: new Date(),
-      ...createRecordDto,
-    };
+    const newRecord = this.recordRepository.create({
+      amount: createRecordDto.amount,
+      user: { id: createRecordDto.userId },
+      category: { id: createRecordDto.categoryId },
+    });
 
-    this.records.push(newRecord);
-    return newRecord;
+    return this.recordRepository.save(newRecord);
   }
 
-  findAllFiltered(userId?: string, categoryId?: string): Record[] {
+  async findAllFiltered(
+    userId?: string,
+    categoryId?: string,
+  ): Promise<Record[]> {
     if (!userId && !categoryId) {
       throw new BadRequestException(
         "At least one filter parameter (user_id or category_id) must be provided.",
       );
     }
 
-    let filteredRecords: Record[] = [...this.records];
+    const whereClause: FindOptionsWhere<Record> = {};
 
     if (userId) {
-      filteredRecords = filteredRecords.filter(
-        (record) => record.userId === userId,
-      );
+      whereClause.user = { id: userId };
     }
-
     if (categoryId) {
-      filteredRecords = filteredRecords.filter(
-        (record) => record.categoryId === categoryId,
-      );
+      whereClause.category = { id: categoryId };
     }
 
-    return filteredRecords;
+    return this.recordRepository.find({ where: whereClause });
   }
 
-  findOne(id: string): Record {
-    const record: Record | undefined = this.records.find(
-      (record) => record.id === id,
-    );
+  async findOne(id: string): Promise<Record> {
+    const record = await this.recordRepository.findOneBy({ id: id });
     if (!record) {
       throw new NotFoundException(`Record with ID #${id} not found.`);
     }
     return record;
   }
 
-  remove(id: string): { message: string } {
-    const recordIndex = this.records.findIndex((record) => record.id === id);
-    if (recordIndex === -1) {
+  async remove(id: string): Promise<{ message: string }> {
+    const result = await this.recordRepository.delete(id);
+    if (result.affected === 0) {
       throw new NotFoundException(`Record with ID #${id} not found.`);
     }
-    this.records.splice(recordIndex, 1);
     return { message: `Record with ID #${id}  successfully deleted.` };
   }
 }
