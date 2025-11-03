@@ -1,18 +1,36 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "./entities/user.entity";
 import { Repository } from "typeorm";
+import { CurrencyService } from "../currency/currency.service";
+import { Currency } from "../currency/entities/currency.entity";
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly currencyService: CurrencyService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const newUser = this.userRepository.create(createUserDto);
+    let uahCurrency: Currency;
+    try {
+      uahCurrency = await this.currencyService.findOneByCode("UAH");
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Base currency "UAH" not found: ${error}`,
+      );
+    }
+    const newUser = this.userRepository.create({
+      ...createUserDto,
+      defaultCurrency: uahCurrency,
+    });
     return this.userRepository.save(newUser);
   }
 
@@ -26,6 +44,14 @@ export class UsersService {
       throw new NotFoundException(`User with ID #${id} not found.`);
     }
     return user;
+  }
+
+  async setDefaultCurrency(userId: string, currencyId: string): Promise<User> {
+    await this.findOne(userId);
+    await this.currencyService.findOne(currencyId);
+    await this.userRepository.update(userId, { defaultCurrencyId: currencyId });
+
+    return this.findOne(userId);
   }
 
   async remove(id: string): Promise<{ message: string }> {

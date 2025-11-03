@@ -41,6 +41,14 @@ export class CurrencyService {
     return currency;
   }
 
+  async findOneByCode(code: string): Promise<Currency> {
+    const currency = await this.currencyRepository.findOneBy({ code: code });
+    if (!currency) {
+      throw new NotFoundException(`Currency with code #${code} not found.`);
+    }
+    return currency;
+  }
+
   async remove(id: string): Promise<{ message: string }> {
     const result = await this.currencyRepository.delete(id);
     if (result.affected === 0) {
