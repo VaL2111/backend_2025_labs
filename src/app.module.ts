@@ -9,12 +9,14 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { User } from "./users/entities/user.entity";
 import { Category } from "./categories/entities/category.entity";
 import { Record } from "./records/entities/record.entity";
+import { CurrencyModule } from "./currency/currency.module";
 
 @Module({
   imports: [
     UsersModule,
     CategoriesModule,
     RecordsModule,
+    CurrencyModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ".env",
