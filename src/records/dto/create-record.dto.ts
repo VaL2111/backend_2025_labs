@@ -1,4 +1,4 @@
-import { IsNumber, IsPositive, IsUUID } from "class-validator";
+import { IsNumber, IsOptional, IsPositive, IsUUID } from "class-validator";
 
 export class CreateRecordDto {
   @IsUUID()
@@ -10,4 +10,8 @@ export class CreateRecordDto {
   @IsNumber()
   @IsPositive()
   amount: number;
+
+  @IsOptional()
+  @IsUUID()
+  currencyId?: string;
 }

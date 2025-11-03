@@ -9,6 +9,7 @@ import { CategoriesService } from "src/categories/categories.service";
 import { FindOptionsWhere, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Record } from "./entities/record.entity";
+import { CurrencyService } from "../currency/currency.service";
 
 @Injectable()
 export class RecordsService {
@@ -18,16 +19,32 @@ export class RecordsService {
 
     private readonly usersService: UsersService,
     private readonly categoriesService: CategoriesService,
+    private readonly currencyService: CurrencyService,
   ) {}
 
   async create(createRecordDto: CreateRecordDto): Promise<Record> {
-    await this.usersService.findOne(createRecordDto.userId);
+    const user = await this.usersService.findOne(createRecordDto.userId);
     await this.categoriesService.findOne(createRecordDto.categoryId);
+
+    let currencyIdToSave: string;
+
+    if (createRecordDto.currencyId) {
+      await this.currencyService.findOne(createRecordDto.currencyId);
+      currencyIdToSave = createRecordDto.currencyId;
+    } else {
+      if (!user.defaultCurrencyId) {
+        throw new BadRequestException(
+          `User with ID #${user.id} does not have a default currency set.`,
+        );
+      }
+      currencyIdToSave = user.defaultCurrencyId;
+    }
 
     const newRecord = this.recordRepository.create({
       amount: createRecordDto.amount,
       user: { id: createRecordDto.userId },
       category: { id: createRecordDto.categoryId },
+      currency: { id: currencyIdToSave },
     });
 
     return this.recordRepository.save(newRecord);
