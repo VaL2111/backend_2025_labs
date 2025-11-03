@@ -1,4 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "../../users/entities/user.entity";
+import { Record } from "../../records/entities/record.entity";
 
 @Entity({ name: "currencies" })
 export class Currency {
@@ -10,4 +12,10 @@ export class Currency {
 
   @Column()
   name: string;
+
+  @OneToMany(() => User, (user) => user.defaultCurrency)
+  users: User[];
+
+  @OneToMany(() => Record, (record) => record.currency)
+  records: Record[];
 }
