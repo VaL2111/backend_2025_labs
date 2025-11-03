@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Delete } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  ParseUUIDPipe,
+} from "@nestjs/common";
 import { CurrencyService } from "./currency.service";
 import { CreateCurrencyDto } from "./dto/create-currency.dto";
 
@@ -17,12 +25,12 @@ export class CurrencyController {
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.currencyService.findOne(+id);
+  findOne(@Param("id", ParseUUIDPipe) id: string) {
+    return this.currencyService.findOne(id);
   }
 
   @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.currencyService.remove(+id);
+  remove(@Param("id", ParseUUIDPipe) id: string) {
+    return this.currencyService.remove(id);
   }
 }

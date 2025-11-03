@@ -10,6 +10,7 @@ import { User } from "./users/entities/user.entity";
 import { Category } from "./categories/entities/category.entity";
 import { Record } from "./records/entities/record.entity";
 import { CurrencyModule } from "./currency/currency.module";
+import { Currency } from "./currency/entities/currency.entity";
 
 @Module({
   imports: [
@@ -34,7 +35,7 @@ import { CurrencyModule } from "./currency/currency.module";
         password: configService.get<string>("DATABASE_PASSWORD"),
         database: configService.get<string>("DATABASE_NAME"),
 
-        entities: [User, Category, Record],
+        entities: [User, Category, Record, Currency],
         synchronize: true,
       }),
     }),
