@@ -7,6 +7,7 @@ import {
 } from "typeorm";
 import { User } from "../../users/entities/user.entity";
 import { Category } from "../../categories/entities/category.entity";
+import { Currency } from "../../currency/entities/currency.entity";
 
 @Entity({ name: "records" })
 export class Record {
@@ -21,13 +22,16 @@ export class Record {
 
   @ManyToOne(() => User, (user) => user.records)
   user: User;
-
   @Column()
   userId: string;
 
   @ManyToOne(() => Category, (category) => category.records)
   category: Category;
-
   @Column()
   categoryId: string;
+
+  @ManyToOne(() => Currency, (currency) => currency.records)
+  currency: Currency;
+  @Column()
+  currencyId: string;
 }
