@@ -13,7 +13,7 @@ import { CreateCurrencyDto } from "./dto/create-currency.dto";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
 @Controller("currency")
-//@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class CurrencyController {
   constructor(private readonly currencyService: CurrencyService) {}
 
