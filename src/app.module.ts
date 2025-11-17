@@ -11,6 +11,7 @@ import { Category } from "./categories/entities/category.entity";
 import { Record } from "./records/entities/record.entity";
 import { CurrencyModule } from "./currency/currency.module";
 import { Currency } from "./currency/entities/currency.entity";
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { Currency } from "./currency/entities/currency.entity";
         synchronize: true,
       }),
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

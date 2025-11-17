@@ -9,6 +9,7 @@ import { User } from "./entities/user.entity";
 import { Repository } from "typeorm";
 import { CurrencyService } from "../currency/currency.service";
 import { Currency } from "../currency/entities/currency.entity";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class UsersService {
@@ -27,8 +28,13 @@ export class UsersService {
         `Base currency "UAH" not found: ${error}`,
       );
     }
+
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
+
     const newUser = this.userRepository.create({
       ...createUserDto,
+      password: hashedPassword,
       defaultCurrency: uahCurrency,
     });
     return this.userRepository.save(newUser);
