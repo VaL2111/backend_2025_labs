@@ -7,11 +7,14 @@ import {
   Delete,
   Query,
   ParseUUIDPipe,
+  UseGuards,
 } from "@nestjs/common";
 import { RecordsService } from "./records.service";
 import { CreateRecordDto } from "./dto/create-record.dto";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
 @Controller("record")
+@UseGuards(JwtAuthGuard)
 export class RecordsController {
   constructor(private readonly recordsService: RecordsService) {}
 

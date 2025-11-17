@@ -7,12 +7,15 @@ import {
   Delete,
   Put,
   ParseUUIDPipe,
+  UseGuards,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { SetDefaultCurrencyDto } from "./dto/set-default-currency.dto";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
 @Controller()
+@UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
