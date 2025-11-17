@@ -84,3 +84,7 @@
 * `GET /record` - Отримує всі валюти.
 * `GET /record/:id` - Отримує валюту за ID.
 * `DELETE /record/:id` - Видаляє валюту за ID.
+
+### Аутентифікація (Auth)
+* `POST /auth/register` - Реєстрація.
+* `POST /auth/login` - Логін.
