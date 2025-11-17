@@ -1,34 +1,29 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Controller, Post, Body, UnauthorizedException } from "@nestjs/common";
+import { AuthService } from "./auth.service";
+import { loginDTO } from "./dto/login.dto";
+import { CreateUserDto } from "../users/dto/create-user.dto";
+import { User } from "../users/entities/user.entity";
 
-@Controller('auth')
+@Controller("auth")
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  @Post("register")
+  register(@Body() createUserDto: CreateUserDto) {
+    return this.authService.register(createUserDto);
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
-  }
+  @Post("login")
+  async login(@Body() loginDto: loginDTO) {
+    const user = await this.authService.validateUser(
+      loginDto.name,
+      loginDto.password,
+    );
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
+    if (!user) {
+      throw new UnauthorizedException("Invalid credentials");
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+    return this.authService.login(user);
   }
 }

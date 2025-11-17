@@ -1,26 +1,39 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Injectable } from "@nestjs/common";
+import { UsersService } from "../users/users.service";
+import { JwtService } from "@nestjs/jwt";
+import { CreateUserDto } from "../users/dto/create-user.dto";
+import { User } from "../users/entities/user.entity";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
+
+  async register(createUserDTO: CreateUserDto) {
+    const user = await this.usersService.create(createUserDTO);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...result } = user;
+    return result;
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  async validateUser(name: string, pass: string) {
+    const user: User | null = await this.usersService.findOneByName(name);
+
+    if (user && (await bcrypt.compare(pass, user.password))) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...result } = user;
+      return result;
+    }
+    return null;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  login(user: { name: string; id: string }): { access_token: string } {
+    const payload = { username: user.name, sub: user.id };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
   }
 }

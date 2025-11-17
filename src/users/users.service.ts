@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -37,11 +38,24 @@ export class UsersService {
       password: hashedPassword,
       defaultCurrency: uahCurrency,
     });
-    return this.userRepository.save(newUser);
+
+    try {
+      return await this.userRepository.save(newUser);
+    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (error.code === "23505") {
+        throw new ConflictException("User with this username already exists");
+      }
+      throw error;
+    }
   }
 
   async findAll(): Promise<User[]> {
     return this.userRepository.find();
+  }
+
+  async findOneByName(name: string): Promise<User | null> {
+    return this.userRepository.findOneBy({ name });
   }
 
   async findOne(id: string): Promise<User> {
