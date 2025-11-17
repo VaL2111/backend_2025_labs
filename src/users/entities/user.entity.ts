@@ -13,8 +13,11 @@ export class User {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column()
+  @Column({ unique: true })
   name: string;
+
+  @Column()
+  password: string;
 
   @OneToMany(() => Record, (record) => record.user)
   records: Record[];
